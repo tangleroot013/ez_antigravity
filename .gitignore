@@ -17,3 +17,7 @@ __pycache__/
 *.before-recovery
 logs/
 watermarks-remover/
+
+# Local artifacts
+*.save
+.DS_Store

@@ -161,17 +161,6 @@ class GravEngine:
             raise ValueError("Corrupted telemetry string detected (contains 'NaN' or 'Inf').")
 
         return report
-"""
-ez_grav.py - Executable Async TUI & CLI Engine for Python Antigravity Ecosystem
-"""
-
-import sys
-import os
-import math
-import time
-import asyncio
-import argparse
-import webbrowser
 from dataclasses import dataclass, field
 
 G_CONST = 6.67430e-11  # m^3 kg^-1 s^-2
