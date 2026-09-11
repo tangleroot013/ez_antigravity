@@ -22,3 +22,43 @@ def test_seeded_temperature_is_reproducible() -> None:
     second = make_sample(step=1, mass_kg=10.0)
 
     assert first == second
+
+
+def test_count_mode_emits_exactly_five_samples() -> None:
+    import json
+    import os
+    import subprocess
+    import sys
+
+    environment = os.environ.copy()
+    environment["PYTHONPATH"] = "src"
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "agy_synth.stream",
+            "--count",
+            "5",
+            "--interval",
+            "0",
+            "--seed",
+            "42",
+        ],
+        env=environment,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+
+    samples = [json.loads(line) for line in result.stdout.splitlines()]
+
+    assert len(samples) == 5
+
+PYTHONPATH="$PWD/src" python - <<'PYEOF'
+import inspect
+import ez_grav
+
+print(inspect.getfile(ez_grav))
+print(inspect.signature(ez_grav.GravEngine))
+print(inspect.signature(ez_grav.PhysicsState))
