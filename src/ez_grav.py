@@ -64,20 +64,22 @@ class GravEngine:
     def toggle_negative_mass(self, flag):
         self.state.is_negative_mass = bool(flag)
 
-    def calculate_lift_force(self):
+    def calculate_lift_force(self) -> float:
+        """Calculates net lift force using local gravity based on altitude."""
         if self.state.zero_g_mode:
             return 0.0
-
         if self.state.altitude_m <= 0:
             return 0.0
-
-        lift = self.state.mass_kg * STANDARD_G
-
+        
+        # Unified gravity: g_local = (G * M_earth) / r^2
+        r = EARTH_RADIUS + self.state.altitude_m
+        g_local = (G_CONST * EARTH_MASS) / (r ** 2)
+        force = self.state.mass_kg * g_local
+        
         if self.state.is_negative_mass:
-            lift = -lift
-
-        return round(lift, 2)
-
+            force = -force
+        
+        return round(force, 4)
     def get_lift_force(self):
         return self.calculate_lift_force()
 
