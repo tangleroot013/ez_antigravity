@@ -1,0 +1,633 @@
+ez_grav CLI, TUI & Devcontainer Reference Manual
+
+The ez_grav engine provides a command-line interface, an interactive terminal user interface, and devcontainer tooling for Python's antigravity ecosystem. This reference manual consolidates all runtime options, command palette syntax, hotkey shortcuts, telemetry specs, physics equations, devcontainer specs, and GitHub CLI workflows into structured, scannable tables.
+
+1. Global CLI Startup Flags
+
+When launching ez_grav from a terminal shell, these flags control session initialization, payload parameters, and debug logging options:
+
+Flag
+
+Short
+
+Value Type
+
+Default Value
+
+Description & Purpose
+
+Example Usage
+
+--gui
+
+-g
+
+bool
+
+false
+
+Automatically opens the Python antigravity browser hook (xkcd.com/353) on startup.
+
+ez_grav --gui
+
+--zero-g
+
+-z
+
+bool
+
+false
+
+Initializes the session with zero-gravity field simulation active.
+
+ez_grav -z
+
+--config
+
+-c
+
+filepath
+
+~/.config/ez_grav.yaml
+
+Specifies a custom YAML configuration file for user-defined runtime defaults.
+
+ez_grav -c /etc/ez_grav.yaml
+
+--mass
+
+-m
+
+float ($\text{kg}$)
+
+70.0
+
+Sets initial payload mass ($m$) used for net lift force calculations.
+
+ez_grav -m 85.5
+
+--verbose
+
+-v
+
+bool
+
+false
+
+Enables detailed debug log output in the lower event buffer panel.
+
+ez_grav -v
+
+--help
+
+-h
+
+None
+
+N/A
+
+Displays command-line usage summary and exits.
+
+ez_grav --help
+
+2. Interactive TUI Slash Commands
+
+Inside an active ez_grav terminal session, typing / invokes the command palette.
+
+Slash Command
+
+Arguments
+
+Arg Types
+
+Default Arg
+
+Functionality & Effect
+
+Example Invocation
+
+/fly
+
+[altitude_m]
+
+float
+
+100.0
+
+Engages hover coils and sets target levitation height in meters ($h$).
+
+/fly 250.5
+
+/xkcd
+
+[comic_num]
+
+int / str
+
+353
+
+Triggers browser hook to open specified xkcd comic in standard browser.
+
+/xkcd 353
+
+/zero-g
+
+[on|off]
+
+str / bool
+
+on
+
+Toggles the zero-gravity anti-gravitational field matrix on or off.
+
+/zero-g off
+
+/mass-swap
+
+[mass_kg]
+
+float
+
+(current)
+
+Updates payload mass $m$ and flips mass tensor sign ($+m \leftrightarrow -m$).
+
+/mass-swap 85
+
+/orbit
+
+[altitude_km]
+
+float
+
+400.0
+
+Calculates circular orbital velocity ($v = \sqrt{\frac{G \cdot M_{\oplus}}{R_{\oplus} + h_{\text{orbit}}}}$) at altitude.
+
+/orbit 400
+
+/metric
+
+[flat|curved]
+
+str
+
+flat
+
+Switches local spacetime metric tensor parameterization ($g_{\mu\nu}$).
+
+/metric curved
+
+/status
+
+None
+
+N/A
+
+N/A
+
+Telemeters container host CPU/RAM utilization and coil temperatures.
+
+/status
+
+/config
+
+[key] [val]
+
+string pair
+
+N/A
+
+Reads or dynamically updates runtime configuration settings in memory.
+
+/config coil_temp 22.0
+
+/clear
+
+None
+
+N/A
+
+N/A
+
+Flushes all log entries from the TUI event buffer and clears the screen.
+
+/clear
+
+/help
+
+None
+
+N/A
+
+N/A
+
+Prints listing of all supported slash commands and quick parameter help.
+
+/help
+
+/quit
+
+None
+
+N/A
+
+N/A
+
+Safely disengages lift coils and exits the ez_grav shell interface.
+
+/quit
+
+/exit
+
+None
+
+N/A
+
+N/A
+
+Alias for /quit. Initiates clean shutdown protocol.
+
+/exit
+
+3. Default Keyboard Shortcuts
+
+ez_grav provides keyboard hotkeys for rapid navigation and control when using a full TUI frontend (e.g., Textual or prompt_toolkit):
+
+Key Combination
+
+Command Scope
+
+Primary Action
+
+Triggered Effect
+
+Ctrl + G
+
+Global
+
+Quick Zero-G Field Toggle
+
+Immediately toggles zero-gravity simulation mode on or off.
+
+Space
+
+Global
+
+Pause / Resume Physics Loop
+
+Freezes active altitude drift, thermal decay, and telemetry calculations.
+
+▲ / ▼
+
+Input Line
+
+Command Prompt History
+
+Cycles backward and forward through previous command inputs.
+
+j / k
+
+Navigation
+
+Log Buffer Scroll (Down / Up)
+
+Scrolls lower event log buffer line by line.
+
+Shift + L
+
+Global
+
+Direct Browser Shortcut
+
+Opens https://xkcd.com/353/ in default system browser.
+
+Ctrl + R
+
+Global
+
+Spatial Recalibration
+
+Resets spacetime metric parameters and vector fields to defaults.
+
+Ctrl + L
+
+Global
+
+Terminal Screen Redraw
+
+Clears terminal buffer and redraws UI telemetry panels.
+
+Tab
+
+Input Line
+
+Autocomplete
+
+Auto-completes matching slash commands and keyword arguments.
+
+Ctrl + C / q
+
+Global
+
+Emergency Disengage
+
+Triggers safe descent sequence and terminates application loop.
+
+4. System Telemetry & Monitoring Panel
+
+The top panel of the ez_grav TUI updates continuously with real-time state telemetry:
+
+Telemetry Field
+
+Display Format
+
+Metric Unit
+
+Description & Operational Bounds
+
+Payload Mass ($m$)
+
++70.0 / -70.0
+
+$\text{kg}$
+
+Mass tensor value; negative value indicates exotic mass mode.
+
+Hover Altitude ($h$)
+
+0.00 to 10000.00
+
+$\text{m}$
+
+Active levitation height above surface; decays passively if unpowered.
+
+Zero-G Field Mode
+
+ACTIVE / INACTIVE
+
+Flag
+
+Displays whether anti-gravitational field simulation matrix is enabled.
+
+Spacetime Metric ($g_{\mu\nu}$)
+
+[FLAT] / [CURVED]
+
+Tensor
+
+Active Minkowski flat or Schwarzschild curved metric model.
+
+Net Lift Force ($F_{\text{net}}$)
+
++686.4655
+
+$\text{N}$
+
+Calculated upward force balance after subtracting gravitational pull.
+
+Coil Temperature ($T_{\text{coil}}$)
+
+24.5
+
+$^\circ\text{C}$
+
+Superconducting magnetic coil thermal level ($100.0^\circ\text{C}$ cutoff safety).
+
+5. Core Mathematical & Physics Equations
+
+ez_grav calculates telemetry using these foundational equations:
+
+Physics Metric
+
+Equation
+
+Variable Definitions
+
+Net Lift Force
+
+$F_{\text{net}} = m \cdot g_0 \cdot \left(1 + \frac{h}{1000} \cdot 0.01\right) - m \cdot g_0$
+
+$m$: mass ($\text{kg}$), $g_0 = 9.80665\text{ m/s}^2$, $h$: altitude ($\text{m}$)
+
+Orbital Velocity
+
+$v = \sqrt{\frac{G \cdot M_{\oplus}}{R_{\oplus} + h_{\text{orbit}}}}$
+
+$G = 6.6743 \times 10^{-11}\text{ m}^3\text{kg}^{-1}\text{s}^{-2}$, $M_{\oplus} = 5.972 \times 10^{24}\text{ kg}$, $R_{\oplus} = 6.371 \times 10^6\text{ m}$
+
+Thermal Cooling
+
+$\frac{dT_{\text{coil}}}{dt} = -k \cdot (T_{\text{coil}} - T_{\text{ambient}})$
+
+$k$: cooling rate constant ($0.5\text{ s}^{-1}$), $T_{\text{ambient}} = 20.0^\circ\text{C}$
+
+6. Devcontainer & Environment Specification (devcontainer.json)
+
+A. Lifecycle Scripts Execution Order
+
+Lifecycle commands execute in a deterministic sequence during container initialization:
+
+Script Property
+
+Execution Location
+
+Context & Access
+
+Primary Usage
+
+initializeCommand
+
+Host Machine
+
+Host environment
+
+Runs pre-build host setup (e.g., local directory provisioning).
+
+onCreateCommand
+
+Container
+
+Early build phase
+
+Installs base system packages and toolchains.
+
+updateContentCommand
+
+Container
+
+Source code mounted
+
+Fetches workspace dependencies or prebuilds artifacts.
+
+postCreateCommand
+
+Container
+
+User assigned & authenticated
+
+Installs user packages (pip install -r requirements.txt).
+
+postStartCommand
+
+Container
+
+Every container startup
+
+Starts background daemon threads or telemetry services.
+
+postAttachCommand
+
+Container
+
+Tool connection complete
+
+Displays welcome telemetry banner or shell alias initialization.
+
+B. Devcontainer Runtime Configuration Properties
+
+Property
+
+Type
+
+Description
+
+Default / Example
+
+remoteEnv
+
+object
+
+Sets runtime environment variables for container terminals.
+
+"remoteEnv": { "EZ_GRAV_ENV": "dev" }
+
+remoteUser
+
+string
+
+User running supporting services/terminals inside container.
+
+"vscode" or "root"
+
+forwardPorts
+
+array[int]
+
+Local ports published from container to host machine.
+
+"forwardPorts": [8080, 5000]
+
+portsAttributes
+
+object
+
+Configures port labels, protocols, and browser auto-launch rules.
+
+onAutoForward: "notify"
+
+overrideCommand
+
+bool
+
+Replaces container entrypoint with persistent loop sleep.
+
+true
+
+privileged
+
+bool
+
+Runs container in privileged mode (--privileged).
+
+false
+
+waitFor
+
+enum
+
+Lifecycle step tools wait for before connecting.
+
+"updateContentCommand"
+
+7. GitHub CLI (gh) Reference for Development
+
+When managing ez_grav remote environments and GitHub Codespaces, use the gh command-line utility.
+
+A. gh codespace Subcommands
+
+Command
+
+Syntax / Example
+
+Purpose
+
+rebuild
+
+gh codespace rebuild -c <codespace-name>
+
+Rebuilds devcontainer from devcontainer.json.
+
+create
+
+gh codespace create -r owner/ez_grav -b main
+
+Creates a new GitHub Codespace instance for the repo.
+
+list
+
+gh codespace list
+
+Displays active codespaces and operational statuses.
+
+B. Repository & Environment Management Commands
+
+Command Namespace
+
+Usage Example
+
+Functionality
+
+gh auth
+
+gh auth login / gh auth status
+
+Authenticates CLI with GitHub account credentials.
+
+gh secret
+
+gh secret set COILS_KEY --body "value"
+
+Manages encrypted repository or codespace secrets.
+
+gh variable
+
+gh variable set DEFAULT_MASS --body "70.0"
+
+Sets repository configuration environment variables.
+
+gh repo
+
+gh repo clone owner/ez_grav
+
+Clones or manages the target source repository.
+
+8. Python API Integration Quickstart
+
+The core GravEngine class can also be integrated directly into external Python tools:
+
+import ez_grav
+
+# 1. Instantiate the core engine
+engine = ez_grav.GravEngine(mass_kg=85.0, zero_g=True, verbose=True)
+
+# 2. Configure antigravity settings
+engine.enable_zero_g(True)
+engine.mass_swap()  # Flips mass tensor to negative mass mode
+
+# 3. Retrieve telemetry calculations
+lift = engine.get_lift_force()
+v_orb = engine.calculate_orbital_velocity(altitude_km=400.0)
+
+print(f"Net Lift Force    : {lift} N")
+print(f"LEO Orbital Speed : {v_orb} m/s")

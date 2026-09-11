@@ -21,3 +21,12 @@ watermarks-remover/
 # Local artifacts
 *.save
 .DS_Store
+
+# Local recovery and backup artifacts
+recovery/
+*.bak
+*.before-recovery
+*.save
+.DS_Store
+*.pyc
+__pycache__/
