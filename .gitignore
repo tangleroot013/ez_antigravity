@@ -10,3 +10,4 @@ backups/
 handover/
 logs/
 recovery/
+repo-safety-backups/**/proc/
