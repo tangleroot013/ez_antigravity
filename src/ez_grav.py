@@ -160,8 +160,7 @@ class GravEngine:
         if "nan" in report.lower() or "inf" in report.lower():
             raise ValueError("Corrupted telemetry string detected (contains 'NaN' or 'Inf').")
 
-        return reporto
-        sr/bin/env python3
+        return report
 """
 ez_grav.py - Executable Async TUI & CLI Engine for Python Antigravity Ecosystem
 """

@@ -16,3 +16,4 @@ __pycache__/
 *.bak
 *.before-recovery
 logs/
+watermarks-remover/
