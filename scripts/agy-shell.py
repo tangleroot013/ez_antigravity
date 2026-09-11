@@ -4,21 +4,57 @@
 from __future__ import annotations
 
 import code
-import readline
 import rlcompleter
 import sys
 from pathlib import Path
 
+try:
+    import readline
+except ImportError:
+    readline = None
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+def find_project_root() -> Path:
+    """Locate the project root from the script or current directory."""
+    file_value = globals().get("__file__")
+
+    if file_value:
+        file_path = Path(file_value).resolve()
+
+        if file_path.name != "<string>" and file_path.exists():
+            if file_path.parent.name == "scripts":
+                return file_path.parent.parent
+            return file_path.parent
+
+    cwd = Path.cwd()
+
+    for candidate in [cwd, *cwd.parents]:
+        if (
+            (candidate / "src" / "ez_grav.py").exists()
+            or (candidate / "ez_grav.py").exists()
+        ):
+            return candidate
+
+    return cwd
+
+
+PROJECT_ROOT = find_project_root()
 SRC_DIR = PROJECT_ROOT / "src"
 
 
 def add_import_paths() -> None:
     """Make the project root and src directory importable."""
-    for path in (SRC_DIR, PROJECT_ROOT):
+    paths = (
+        SRC_DIR,
+        PROJECT_ROOT,
+        Path.cwd(),
+        Path.cwd() / "src",
+    )
+
+    for path in paths:
         path_string = str(path)
-        if path_string not in sys.path:
+
+        if path.exists() and path_string not in sys.path:
             sys.path.insert(0, path_string)
 
 
@@ -40,6 +76,7 @@ def load_physics():
             EARTH_RADIUS,
             STANDARD_G,
         )
+
     except ImportError as first_error:
         try:
             from src.ez_grav import (
@@ -57,6 +94,7 @@ def load_physics():
                 EARTH_RADIUS,
                 STANDARD_G,
             )
+
         except ImportError as second_error:
             print(
                 "❌ Could not import GravEngine.\n"
@@ -85,7 +123,11 @@ def print_status(engine) -> None:
 
 
 def configure_completion(namespace: dict[str, object]) -> None:
-    """Enable readline tab completion for the REPL namespace."""
+    """Enable readline tab completion when available."""
+    if readline is None:
+        print("⚠️ Tab completion is unavailable on this platform.")
+        return
+
     completer = rlcompleter.Completer(namespace)
     readline.set_completer(completer.complete)
     readline.parse_and_bind("tab: complete")
@@ -140,6 +182,7 @@ def main() -> int:
     }
 
     configure_completion(namespace)
+
     code.interact(
         banner=build_banner(),
         local=namespace,
