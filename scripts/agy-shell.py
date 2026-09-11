@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 """agy-shell: interactive sandbox REPL for ez_antigravity."""
 
 from __future__ import annotations
@@ -15,11 +16,10 @@ except ImportError:
 
 
 def find_project_root() -> Path:
-    """Locate the project root from the script or current directory."""
-    file_value = globals().get("__file__")
+    """Locate the project root directory."""
 
-    if file_value:
-        file_path = Path(file_value).resolve()
+    if "__file__" in globals():
+        file_path = Path(__file__).resolve()
 
         if file_path.name != "<string>" and file_path.exists():
             if file_path.parent.name == "scripts":
@@ -28,7 +28,7 @@ def find_project_root() -> Path:
 
     cwd = Path.cwd()
 
-    for candidate in [cwd, *cwd.parents]:
+    for candidate in [cwd] + list(cwd.parents):
         if (
             (candidate / "src" / "ez_grav.py").exists()
             or (candidate / "ez_grav.py").exists()
@@ -44,14 +44,8 @@ SRC_DIR = PROJECT_ROOT / "src"
 
 def add_import_paths() -> None:
     """Make the project root and src directory importable."""
-    paths = (
-        SRC_DIR,
-        PROJECT_ROOT,
-        Path.cwd(),
-        Path.cwd() / "src",
-    )
 
-    for path in paths:
+    for path in (SRC_DIR, PROJECT_ROOT, Path.cwd(), Path.cwd() / "src"):
         path_string = str(path)
 
         if path.exists() and path_string not in sys.path:
@@ -60,6 +54,7 @@ def add_import_paths() -> None:
 
 def load_physics():
     """Import and return the physics API."""
+
     try:
         from ez_grav import (
             EARTH_MASS,
@@ -108,10 +103,27 @@ def load_physics():
 
 def print_status(engine) -> None:
     """Print current engine telemetry."""
+
+    state = engine.state
+
+    coil_temp = getattr(state, "coil_temp_k", None)
+
+    if coil_temp is None:
+        coil_temp = getattr(state, "temp_k", None)
+
+    if coil_temp is None:
+        coil_temp = getattr(engine, "coil_temp_k", None)
+
+    temp_display = (
+        f"{coil_temp} K"
+        if coil_temp is not None
+        else "N/A"
+    )
+
     print("\n--- 🦆 AGY Engine Status ---")
-    print(f" Mass: {engine.state.mass_kg} kg")
-    print(f" Altitude: {engine.state.altitude_m} m")
-    print(f" Coil Temp: {engine.state.coil_temp_k} K")
+    print(f" Mass: {state.mass_kg} kg")
+    print(f" Altitude: {state.altitude_m} m")
+    print(f" Coil Temp: {temp_display}")
     print(f" Local Gravity: {engine.local_gravity():.6f} m/s²")
     print(f" Lift Force: {engine.calculate_lift_force():.2f} N")
     print(
@@ -123,7 +135,8 @@ def print_status(engine) -> None:
 
 
 def configure_completion(namespace: dict[str, object]) -> None:
-    """Enable readline tab completion when available."""
+    """Enable readline tab completion if available."""
+
     if readline is None:
         print("⚠️ Tab completion is unavailable on this platform.")
         return
@@ -136,7 +149,7 @@ def configure_completion(namespace: dict[str, object]) -> None:
 def build_banner() -> str:
     return (
         "====================================================\n"
-        " 🦆 AGY-SHELL: GravEngine Sandbox REPL 🦆\n"
+        " 🦆 AGY-SHELL: GravEngine Sandbox REPL 🦆 \n"
         "====================================================\n"
         "Pre-loaded symbols:\n"
         " - GravEngine\n"
