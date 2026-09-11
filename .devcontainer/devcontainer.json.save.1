@@ -1,0 +1,12 @@
+{
+  "remoteEnv": {
+    "SSH_AUTH_SOCK": "/tmp/ssh-agent.sock"
+  },
+  "mounts": [
+    {
+      "type": "bind",
+      "source": "${localEnv:SSH_AUTH_SOCK}",
+      "target": "/tmp/ssh-agent.sock"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+GNU nano 7.2                         .devcontainer/devcontainer.json *                         I   S
+ 1 {
+ 2   "remoteEnv": {
+ 3     "SSH_AUTH_SOCK": "/tmp/ssh-agent.sock"
+ 4   },
+ 5   "mounts": [
+ 6     {
+ 7       "type": "bind",
+ 8       "source": "${localEnv:SSH_AUTH_SOCK}",
+ 9       "target": "/tmp/ssh-agent.sock"
+10     }
+11   ]
+12 }
+13
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              [ Error writing .devcontainer/devcontainer.json: No such file or directory ]
+^G Help       ^O Write Out  ^W Where Is   ^K Cut        ^T Execute    ^C Location   M-U Undo
+^X Exit       ^R Read File  ^\ Replace    ^U Paste      ^J Justify    ^/ Go To Line M-E Redo
