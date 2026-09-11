@@ -10,7 +10,7 @@ from src.ez_grav import (
 
 
 def test_initial_physics_state():
-    engine = GravEngine(mass_kg=70.0, zero_g=False)
+    engine = GravEngine(PhysicsState(mass_kg=70.0),  zero_g=False)
 
     assert engine.state.mass_kg == 70.0
     assert engine.state.zero_g_mode is False
@@ -19,13 +19,13 @@ def test_initial_physics_state():
 
 
 def test_zero_g_lift_calculation():
-    engine = GravEngine(mass_kg=80.0, zero_g=True)
+    engine = GravEngine(PhysicsState(mass_kg=80.0),  zero_g=True)
 
     assert engine.calculate_lift_force() == 0.0
 
 
 def test_negative_mass_tensor_flip():
-    engine = GravEngine(mass_kg=70.0, zero_g=False)
+    engine = GravEngine(PhysicsState(mass_kg=70.0),  zero_g=False)
     engine.toggle_negative_mass(True)
 
     assert engine.state.is_negative_mass is True
@@ -33,7 +33,7 @@ def test_negative_mass_tensor_flip():
 
 
 def test_orbital_velocity_calculation():
-    engine = GravEngine()
+    engine = GravEngine(PhysicsState(mass_kg=70.0))
 
     actual = engine.calculate_orbital_velocity(altitude_km=400.0)
     expected = round(
@@ -49,11 +49,8 @@ def test_orbital_velocity_calculation():
 
 
 def test_thermal_cooling_tick():
-    state = PhysicsState(
-        coil_temp_c=50.0,
-        ambient_temp_c=20.0,
-        cooling_rate=0.2,
-    )
+    state = PhysicsState(mass_kg=70.0, coil_temp_c=50.0,
+        cooling_rate=0.2)
 
     logs = state.tick(dt=1.0)
 
@@ -62,11 +59,9 @@ def test_thermal_cooling_tick():
 
 
 def test_overheat_emergency_cutoff():
-    state = PhysicsState(
-        coil_temp_c=99.5,
+    state = PhysicsState(mass_kg=70.0, coil_temp_c=99.5,
         altitude_m=1000.0,
-        zero_g_mode=True,
-    )
+        zero_g_mode=True)
 
     logs = state.tick(dt=1.0)
 
