@@ -1,5 +1,10 @@
 import pytest
-from src.ez_grav import GravEngine
+from src.ez_grav import (
+    EARTH_MASS,
+    EARTH_RADIUS,
+    G_CONST,
+    GravEngine,
+)
 
 def test_negative_mass_physics_contract():
     """Verifies sign-flip behavior and local gravity consistency."""
@@ -10,14 +15,21 @@ def test_negative_mass_physics_contract():
     engine.state.is_negative_mass = True
     engine.state.zero_g_mode = False
     
-    # Expected: - (G * M_earth * m) / (R_earth + h)^2
-    # For 70kg at 100m: approx -686.46
     result = engine.calculate_lift_force()
-    
-    # We use a tight tolerance to ensure g_local is actually being used
-    # and not just a rounded STANDARD_G
+
+    radius_m = EARTH_RADIUS + engine.state.altitude_m
+    expected_magnitude = (
+        G_CONST
+        * EARTH_MASS
+        * engine.state.mass_kg
+        / radius_m**2
+    )
+
     assert result < 0
-    assert abs(result) == pytest.approx(686.46, abs=0.01)
+    assert abs(result) == pytest.approx(
+        expected_magnitude,
+        abs=0.01,
+    )
 
 def test_zero_g_override():
     engine = GravEngine()
