@@ -50,8 +50,8 @@ def parse_args() -> argparse.Namespace:
 
     args = parser.parse_args()
 
-    if args.interval <= 0:
-        parser.error("--interval must be greater than zero")
+    if args.interval < 0 or (args.interval == 0 and args.count is None):
+        parser.error("--interval must be greater than zero for continuous mode")
     if args.mass < 0:
         parser.error("--mass must not be negative")
     if args.count is not None and args.count < 0:

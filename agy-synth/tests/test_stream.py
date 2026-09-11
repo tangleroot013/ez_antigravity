@@ -1,7 +1,7 @@
+import json
+import os
+import subprocess
 import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parents[1] / "src"))
 
 from agy_synth.stream import G_LOCAL, make_sample
 
@@ -25,11 +25,6 @@ def test_seeded_temperature_is_reproducible() -> None:
 
 
 def test_count_mode_emits_exactly_five_samples() -> None:
-    import json
-    import os
-    import subprocess
-    import sys
-
     environment = os.environ.copy()
     environment["PYTHONPATH"] = "src"
 
@@ -54,11 +49,3 @@ def test_count_mode_emits_exactly_five_samples() -> None:
     samples = [json.loads(line) for line in result.stdout.splitlines()]
 
     assert len(samples) == 5
-
-PYTHONPATH="$PWD/src" python - <<'PYEOF'
-import inspect
-import ez_grav
-
-print(inspect.getfile(ez_grav))
-print(inspect.signature(ez_grav.GravEngine))
-print(inspect.signature(ez_grav.PhysicsState))
