@@ -6,11 +6,15 @@ Provides the NBodyEngine that the test‑suite expects:
 - get_total_momentum
 - calculate_total_energy
 - update (delegates to the injected integrator)
+
+Also re‑exports GravEngine for backward‑compatible imports:
+    from ez_antigravity.engine import GravEngine
 """
 
 from typing import List, Tuple, Optional
 from .entities import GravEntity
 from .integrators import FastEuler, PreciseRK4
+from .grav_engine import GravEngine   # <-- re‑export
 
 Vector = Tuple[float, float, float]
 
@@ -45,8 +49,7 @@ class NBodyEngine:
         dz = pj[2] - pi[2]
         r2 = dx*dx + dy*dy + dz*dz + self.epsilon**2
         r = r2**0.5
-        # Newton’s law: a = G * m_j / r^2  (direction = (dx,dy,dz)/r)
-        factor = self.G * self.entities[j].mass / (r2 * r)  # = G*m_j / r^3
+        factor = self.G * self.entities[j].mass / (r2 * r)  # G*m_j / r³
         return (dx * factor, dy * factor, dz * factor)
 
     def calculate_accelerations(self) -> List[Vector]:
@@ -55,7 +58,7 @@ class NBodyEngine:
         acc: List[Vector] = [(0.0, 0.0, 0.0) for _ in range(n)]
 
         for i in range(n):
-            ax, ay, az = 0.0, 0.0, 0.0
+            ax = ay = az = 0.0
             for j in range(n):
                 if i == j:
                     continue
@@ -77,13 +80,12 @@ class NBodyEngine:
 
     def calculate_total_energy(self) -> float:
         """Kinetic + potential energy of the system."""
-        # Kinetic
-        kinetic = 0.0
-        for e in self.entities:
-            v2 = e.vel[0]**2 + e.vel[1]**2 + e.vel[2]**2
-            kinetic += 0.5 * e.mass * v2
+        kinetic = sum(
+            0.5 * e.mass *
+            (e.vel[0]**2 + e.vel[1]**2 + e.vel[2]**2)
+            for e in self.entities
+        )
 
-        # Potential (pairwise, avoid double‑count)
         potential = 0.0
         n = len(self.entities)
         for i in range(n):
@@ -102,16 +104,14 @@ class NBodyEngine:
     # ------------------------------------------------------------------ #
     def update(self, dt: float) -> None:
         """Advance the simulation by dt using the configured integrator."""
-        # Extract flat position / velocity tuples for the integrator
         positions = [tuple(e.pos) for e in self.entities]
         velocities = [tuple(e.vel) for e in self.entities]
 
-        # The integrator may accept either (engine, pos, vel, dt) or
-        # (pos, vel, accel_fn, dt). Our FastEuler implementation now
-        # supports both patterns.
         new_pos, new_vel = self.integrator.step(self, positions, velocities, dt)
 
-        # Push the results back into the entities
         for ent, p, v in zip(self.entities, new_pos, new_vel):
             ent.pos = p
             ent.vel = v
+
+# Export for test compatibility
+__all__ = ["NBodyEngine", "GravEngine"]
