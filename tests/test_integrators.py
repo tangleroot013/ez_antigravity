@@ -1,7 +1,7 @@
 import math
 import pytest
-from src.engine import GravEngine
-from src.integrators import FastEuler, PreciseRK4
+from ez_antigravity.engine import GravEngine
+from ez_antigravity.integrators import FastEuler, PreciseRK4
 
 def test_rk4_vs_euler_positional_accuracy():
     r_init = 6.771e6

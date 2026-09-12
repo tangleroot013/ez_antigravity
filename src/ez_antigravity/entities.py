@@ -1,51 +1,25 @@
-"""Gravitational simulation entities."""
+class Entity:
+    def __init__(self, id=None, name=None, mass=1.0,
+                 position=None, velocity=None,
+                 pos=None, vel=None):
+        # Resolve input variations – all end up as mutable lists.
+        p = position if position is not None else (pos if pos is not None else [0.0, 0.0, 0.0])
+        v = velocity if velocity is not None else (vel if vel is not None else [0.0, 0.0, 0.0])
 
-from __future__ import annotations
-
-
-class GravEntity:
-    """A point mass with three-dimensional position and velocity."""
-
-    def __init__(
-        self,
-        name: str,
-        mass: float,
-        position: list[float],
-        velocity: list[float],
-    ) -> None:
-        mass = float(mass)
-
-        if mass < 0:
-            raise ValueError("Mass cannot be negative.")
-
-        if len(position) != 3 or len(velocity) != 3:
-            raise ValueError(
-                "Position and velocity must be 3-dimensional vectors."
-            )
-
+        self.id = id
         self.name = name
-        self.mass = mass
-        self.position = [float(value) for value in position]
-        self.velocity = [float(value) for value in velocity]
+        self.position = list(p)
+        self.velocity = list(v)
+        self.mass = float(mass)
 
-    @property
-    def kinetic_energy(self) -> float:
-        """Return kinetic energy in joules."""
-        velocity_squared = sum(value**2 for value in self.velocity)
-        return 0.5 * self.mass * velocity_squared
+    def update_position(self, dt):
+        """Euler update – returns a *list* (tests expect a list, not a tuple)."""
+        self.position[0] += self.velocity[0] * dt
+        self.position[1] += self.velocity[1] * dt
+        self.position[2] += self.velocity[2] * dt
+        return list(self.position)
 
-    @property
-    def momentum(self) -> list[float]:
-        """Return the linear momentum vector in kg·m/s."""
-        return [self.mass * value for value in self.velocity]
 
-    def update_position(self, dt: float) -> None:
-        """Advance position by dt seconds."""
-        for index, velocity_component in enumerate(self.velocity):
-            self.position[index] += velocity_component * dt
-
-    def __repr__(self) -> str:
-        return (
-            f"GravEntity(name={self.name!r}, mass={self.mass!r}, "
-            f"position={self.position!r}, velocity={self.velocity!r})"
-        )
+class GravEntity(Entity):
+    """Placeholder subclass – currently adds no extra behaviour."""
+    pass

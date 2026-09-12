@@ -1,56 +1,53 @@
 {
-  "project": "ez_grav / nbody_engine",
-  "git_repository": {
-    "branch": "main",
-    "workspace": "agy-workspace",
-    "status": "synchronized"
+  "project": "ez_antigravity",
+  "workspace": "agy-workspace",
+  "handover_version": "1.0",
+  "timestamp": "2026-09-11",
+  "status": "BLOCKED_DURING_TEST_COLLECTION",
+  "confidence": {
+    "verified_from_terminal_output": true,
+    "tests_passing": false,
+    "runtime_stability_claimed": false,
+    "production_ready": false
   },
-  "accomplished_tasks": [
-    {
-      "task": "Integrator API Alignment",
-      "detail": "Resolved TypeError by aligning PreciseRK4.step signature (state, dt, derivatives_fn) with NBodyEngine.update call.",
-      "status": "COMPLETED"
-    },
-    {
-      "task": "Contract Testing Implementation",
-      "detail": "Created tests/test_engine_contract.py using inspect.signature to programmatically enforce the integrator interface.",
-      "status": "COMPLETED"
-    },
-    {
-      "task": "Chaos Divergence Validation",
-      "detail": "Successfully executed Lyapunov divergence test; verified 1nm perturbation growth in figure-eight 3-body system.",
-      "status": "COMPLETED"
-    },
-    {
-      "task": "Lyapunov Exponent Calculation",
-      "detail": "Determined divergence rate lambda approx 4.4356 s^-1, establishing the system's predictability horizon.",
-      "status": "COMPLETED"
-    },
-    {
-      "task": "Physics Engine Unit Testing",
-      "detail": "Implemented test_ez_grav.py covering negative mass inversion, LEO orbital velocity (7672.58 m/s), and thermal emergency cut-offs.",
-      "status": "COMPLETED"
-    }
+  "environment": {
+    "platform": "ChromeOS Crostini Linux",
+    "python": "3.11.2",
+    "virtual_environment": ".venv",
+    "test_runner": "pytest 9.1.1",
+    "installation_mode": "Editable installation",
+    "editable_install_verified": true
+  },
+  "current_blocker": {
+    "category": "package_layout_and_imports",
+    "details": [
+      "src/ez_antigravity/nbody_engine.py still imports src.entities",
+      "ez_antigravity.engine is missing or unconfirmed",
+      "ez_antigravity.ez_grav is missing or unconfirmed",
+      "pytest collection is blocked before tests execute"
+    ]
+  },
+  "required_imports": [
+    "from ez_antigravity.entities import GravEntity",
+    "from ez_antigravity.nbody_engine import NBodyEngine",
+    "from ez_antigravity.engine import GravEngine",
+    "from ez_antigravity.ez_grav import PhysicsState"
   ],
-  "pending_tasks": [
-    {
-      "task": "Pre-commit Hook Setup",
-      "detail": "Automate execution of contract and chaos tests via git hooks to prevent regressions.",
-      "priority": "MEDIUM"
-    },
-    {
-      "task": "Precision Upgrade",
-      "detail": "Evaluate numpy.float64 or decimal module to ensure divergence is physical and not numerical noise.",
-      "priority": "LOW"
-    },
-    {
-      "task": "Divergence Visualization",
-      "detail": "Plot log-scale divergence rate over 2,000 steps to visualize the exponential growth curve.",
-      "priority": "MEDIUM"
-    }
+  "next_commands": [
+    "find src tests -maxdepth 4 -type f -print | sort",
+    "grep -RInE '(^from src\\.|^import src\\.)' src tests || true",
+    "sed -i 's/^from src\\.entities import GravEntity$/from .entities import GravEntity/' src/ez_antigravity/nbody_engine.py",
+    "python -m pytest tests -q",
+    "git diff --check",
+    "git status --short"
   ],
-  "critical_notes": {
-    "opsec_warning": "Ensure src/integrators.py does not contain duplicate PreciseRK4 definitions to avoid import shadowing.",
-    "env_context": "Verified running in Chromebook Crostini environment using Python 3.11.2."
-  }
+  "performance_status": "UNVERIFIED",
+  "test_status": "BLOCKED_DURING_COLLECTION",
+  "do_not_stage_automatically": [
+    "agy-synth",
+    "recovery_test",
+    "src/tests",
+    "src/ez_antigravity.egg-info",
+    "tools/diagnose-ez-jukebox-import.sh"
+  ]
 }

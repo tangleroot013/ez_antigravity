@@ -1,5 +1,5 @@
 import pytest
-from src.ez_grav import (
+from ez_antigravity.ez_grav import (
     EARTH_MASS,
     EARTH_RADIUS,
     G_CONST,
