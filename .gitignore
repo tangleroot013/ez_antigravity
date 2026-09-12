@@ -1,13 +1,27 @@
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.backup.*
-.archive/
-tmp_audit/
-backups/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
 .venv/
+venv/
+ENV/
+
+# Testing & Coverage
 .pytest_cache/
-*.bak
-.diagnostics/
-handover/
+.coverage
+htmlcov/
+
+# OS / IDE specific
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Project specific shadows & logs
+ez_antigravity/
 logs/
-recovery/
-repo-safety-backups/**/proc/
+audit_logs/
+*.log
+*.backup.*
