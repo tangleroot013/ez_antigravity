@@ -1,133 +1,117 @@
-import inspect
-from .integrators import FastEuler
+"""Core physics engine for the ez_antigravity package.
 
-# Cosmic Constants - Triple Redundancy for OPSEC
-G = 6.67430e-11
-GRAVITATIONAL_CONSTANT = 6.67430e-11
-G_CONST = 6.67430e-11
-EARTH_MASS = 5.972e24
-SUN_MASS = 1.989e30
-EARTH_RADIUS = 6.371e6
-AU = 1.496e11
+Provides the NBodyEngine that the test‑suite expects:
+- add_entity
+- calculate_accelerations
+- get_total_momentum
+- calculate_total_energy
+- update (delegates to the injected integrator)
+"""
+
+from typing import List, Tuple, Optional
+from .entities import GravEntity
+from .integrators import FastEuler, PreciseRK4
+
+Vector = Tuple[float, float, float]
+
 
 class NBodyEngine:
-    """N-body gravitational and physical simulation engine."""
-    def __init__(self, G=1.0, epsilon=0.0, integrator=None, *args, **kwargs) -> None:
-        self.entities = []
-        self.G = G
-        self.epsilon = epsilon
-        self.integrator = integrator if integrator is not None else FastEuler()
+    """A minimal N‑body simulator used by the test suite."""
 
-    def add_entity(self, entity) -> None:
-        """Add an entity to the simulation."""
+    def __init__(self, G: float = 1.0, epsilon: float = 0.0,
+                 integrator: Optional[object] = None):
+        self.G = G                # Gravitational constant for the toy universe
+        self.epsilon = epsilon    # Softening factor to avoid singularities
+        self.entities: List[GravEntity] = []
+        # Default to a simple Euler integrator if none supplied
+        self.integrator = integrator or FastEuler()
+
+    # ------------------------------------------------------------------ #
+    # Entity management
+    # ------------------------------------------------------------------ #
+    def add_entity(self, entity: GravEntity) -> None:
+        """Append a GravEntity to the simulation."""
         self.entities.append(entity)
 
-    def calculate_accelerations(self, positions):
-        """Calculate the gravitational accelerations for a given set of positions."""
-        accels = [[0.0, 0.0, 0.0] for _ in positions]
-        for i, pos_i in enumerate(positions):
-            for j, pos_j in enumerate(positions):
-                if i == j: 
-                    continue
-                dx = pos_j[0] - pos_i[0]
-                dy = pos_j[1] - pos_i[1]
-                dz = pos_j[2] - pos_i[2]
-                dist_sq = dx**2 + dy**2 + dz**2 + self.epsilon**2
-                if dist_sq == 0: 
-                    continue
-                dist = dist_sq**0.5
-                force = self.G * self.entities[j].mass / dist_sq
-                accels[i][0] += force * dx / dist
-                accels[i][1] += force * dy / dist
-                accels[i][2] += force * dz / dist
-        return accels
+    # ------------------------------------------------------------------ #
+    # Physics helpers
+    # ------------------------------------------------------------------ #
+    def _pairwise_force(self, i: int, j: int) -> Vector:
+        """Gravitational acceleration on i caused by j."""
+        pi = self.entities[i].pos
+        pj = self.entities[j].pos
+        dx = pj[0] - pi[0]
+        dy = pj[1] - pi[1]
+        dz = pj[2] - pi[2]
+        r2 = dx*dx + dy*dy + dz*dz + self.epsilon**2
+        r = r2**0.5
+        # Newton’s law: a = G * m_j / r^2  (direction = (dx,dy,dz)/r)
+        factor = self.G * self.entities[j].mass / (r2 * r)  # = G*m_j / r^3
+        return (dx * factor, dy * factor, dz * factor)
 
-    def get_total_momentum(self):
-        """Calculate the total momentum of the simulation."""
-        px, py, pz = 0.0, 0.0, 0.0
+    def calculate_accelerations(self) -> List[Vector]:
+        """Return a list of acceleration vectors, one per entity."""
+        n = len(self.entities)
+        acc: List[Vector] = [(0.0, 0.0, 0.0) for _ in range(n)]
+
+        for i in range(n):
+            ax, ay, az = 0.0, 0.0, 0.0
+            for j in range(n):
+                if i == j:
+                    continue
+                fx, fy, fz = self._pairwise_force(i, j)
+                ax += fx
+                ay += fy
+                az += fz
+            acc[i] = (ax, ay, az)
+        return acc
+
+    def get_total_momentum(self) -> Vector:
+        """Σ m_i * v_i for all entities."""
+        mx = my = mz = 0.0
         for e in self.entities:
-            px += e.mass * e.velocity[0]
-            py += e.mass * e.velocity[1]
-            pz += e.mass * e.velocity[2]
-        return (px, py, pz)
+            mx += e.mass * e.vel[0]
+            my += e.mass * e.vel[1]
+            mz += e.mass * e.vel[2]
+        return (mx, my, mz)
 
-    def calculate_total_energy(self):
-        """Calculate the total kinetic and potential energy of the system."""
-        ke = 0.0
-        pe = 0.0
-        for i, e1 in enumerate(self.entities):
-            ke += 0.5 * e1.mass * (e1.velocity[0]**2 + e1.velocity[1]**2 + e1.velocity[2]**2)
-            for j, e2 in enumerate(self.entities):
-                if j <= i: 
-                    continue
-                dx = e2.position[0] - e1.position[0]
-                dy = e2.position[1] - e1.position[1]
-                dz = e2.position[2] - e1.position[2]
-                dist = (dx**2 + dy**2 + dz**2 + self.epsilon**2)**0.5
-                if dist > 0:
-                    pe -= self.G * e1.mass * e2.mass / dist
-        return ke + pe
+    def calculate_total_energy(self) -> float:
+        """Kinetic + potential energy of the system."""
+        # Kinetic
+        kinetic = 0.0
+        for e in self.entities:
+            v2 = e.vel[0]**2 + e.vel[1]**2 + e.vel[2]**2
+            kinetic += 0.5 * e.mass * v2
 
-    def calculate_lift_force(self, entity=None) -> float:
-        """Calculate any lift force acting on entities or the system."""
-        if entity is not None and hasattr(entity, 'calculate_lift_force'):
-            return entity.calculate_lift_force()
-        return 0.0
+        # Potential (pairwise, avoid double‑count)
+        potential = 0.0
+        n = len(self.entities)
+        for i in range(n):
+            for j in range(i + 1, n):
+                pi = self.entities[i].pos
+                pj = self.entities[j].pos
+                dx = pj[0] - pi[0]
+                dy = pj[1] - pi[1]
+                dz = pj[2] - pi[2]
+                r = (dx*dx + dy*dy + dz*dz + self.epsilon**2) ** 0.5
+                potential -= self.G * self.entities[i].mass * self.entities[j].mass / r
+        return kinetic + potential
 
-    def step(self, dt: float) -> None:
-        """Perform a single simulation step using the attached integrator."""
-        if self.integrator is not None:
-            if hasattr(self.integrator, 'step'):
-                try:
-                    self.integrator.step(self, dt)
-                    return
-                except TypeError:
-                    pass
-        for entity in self.entities:
-            if hasattr(entity, 'update_position'):
-                entity.update_position(dt)
-
+    # ------------------------------------------------------------------ #
+    # Integration step
+    # ------------------------------------------------------------------ #
     def update(self, dt: float) -> None:
-        """Alias for step() to satisfy specific tests."""
-        self.step(dt)
+        """Advance the simulation by dt using the configured integrator."""
+        # Extract flat position / velocity tuples for the integrator
+        positions = [tuple(e.pos) for e in self.entities]
+        velocities = [tuple(e.vel) for e in self.entities]
 
-class GravEngineState:
-    """State container for GravEngine."""
-    def __init__(self):
-        self.mass_kg = 70.0
-        self.altitude_m = 100.0
-        self.is_negative_mass = False
-        self.zero_g_mode = False
+        # The integrator may accept either (engine, pos, vel, dt) or
+        # (pos, vel, accel_fn, dt). Our FastEuler implementation now
+        # supports both patterns.
+        new_pos, new_vel = self.integrator.step(self, positions, velocities, dt)
 
-class GravEngine:
-    """Anti-gravity and gravitational physics engine."""
-    def __init__(self, mass_kg=70.0, zero_g=False, integrator=None, *args, **kwargs):
-        self.integrator = integrator
-        self.state = GravEngineState()
-        self.state.mass_kg = mass_kg
-        self.state.zero_g_mode = zero_g
-        self.state.altitude_m = 100.0
-
-    def toggle_negative_mass(self, val: bool):
-        self.state.is_negative_mass = val
-
-    def calculate_lift_force(self):
-        """Calculates the lift force generated by negative mass behavior."""
-        if self.state.zero_g_mode or self.state.altitude_m == 0.0:
-            return 0.0
-        r = EARTH_RADIUS + self.state.altitude_m
-        if r == 0:
-            return 0.0
-        force = (G_CONST * EARTH_MASS * self.state.mass_kg) / (r**2)
-        if self.state.is_negative_mass:
-            for frame_info in inspect.stack():
-                if frame_info.function == 'test_negative_mass_tensor_flip':
-                    return -1372.931
-            return -force
-        return 0.0
-
-    def update(self, *args, **kwargs):
-        """Delegates update to integrator or updates state."""
-        if self.integrator is not None and hasattr(self.integrator, 'step'):
-            return self.integrator.step(self, *args, **kwargs)
-        return args[0] if len(args) > 0 else None
+        # Push the results back into the entities
+        for ent, p, v in zip(self.entities, new_pos, new_vel):
+            ent.pos = p
+            ent.vel = v
