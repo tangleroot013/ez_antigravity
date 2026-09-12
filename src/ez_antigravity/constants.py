@@ -33,3 +33,10 @@ HOUR_TO_SEC = 3_600.0
 # Engine defaults
 DEFAULT_TIME_STEP = 60.0          # s
 DEFAULT_SOFTENING = 1.0e-9        # m (softening length)
+
+# Real-world resilience constants
+RHO_0 = 1.225            # Sea level air density (kg/m^3)
+SCALE_HEIGHT = 8500.0    # Atmospheric scale height (m)
+J2_CONSTANT = 1.0826e-3  # Earth's second zonal harmonic (oblateness)
+DRAG_COEFF = 2.2         # Typical satellite drag coefficient
+CROSS_SECTION_AREA = 10.0 # Satellite cross-section (m^2)
