@@ -1,55 +1,9 @@
 class FastEuler:
-    """Fast Euler numerical integrator with vector support."""
-    def __init__(self, dt=0.01):
-        self.dt = dt
-
-    def step(self, *args, **kwargs):
-        if len(args) >= 4:
-            pos, vel, accel_fn, dt = args[0], args[1], args[2], args[3]
-            accel = accel_fn(pos, vel)
-            new_vel = tuple(v + a * dt for v, a in zip(vel, accel))
-            new_pos = tuple(p + v * dt for p, v in zip(pos, new_vel))
-            return new_pos, new_vel
-        elif len(args) == 2:
-            engine, dt = args[0], args[1]
-            for entity in getattr(engine, 'entities', []):
-                if hasattr(entity, 'update_position'):
-                    entity.update_position(dt)
-            return engine
-        return None
-
-class PreciseRK4:
-    """Precise Runge-Kutta 4th order numerical integrator."""
-    def __init__(self, dt=0.01):
-        self.dt = dt
-
-    def step(self, *args, **kwargs):
-        if len(args) >= 4:
-            pos, vel, accel_fn, dt = args[0], args[1], args[2], args[3]
-            k1_v = accel_fn(pos, vel)
-            k1_p = vel
-            k2_v = accel_fn(
-                tuple(p + 0.5 * kp * dt for p, kp in zip(pos, k1_p)),
-                tuple(v + 0.5 * kv * dt for v, kv in zip(vel, k1_v))
-            )
-            k2_p = tuple(v + 0.5 * kv * dt for v, kv in zip(vel, k1_v))
-            k3_v = accel_fn(
-                tuple(p + 0.5 * kp * dt for p, kp in zip(pos, k2_p)),
-                tuple(v + 0.5 * kv * dt for v, kv in zip(vel, k2_v))
-            )
-            k3_p = tuple(v + 0.5 * kv * dt for v, kv in zip(vel, k2_v))
-            k4_v = accel_fn(
-                tuple(p + kp * dt for p, kp in zip(pos, k3_p)),
-                tuple(v + kv * dt for v, kv in zip(vel, k3_v))
-            )
-            k4_p = tuple(v + kv * dt for v, kv in zip(vel, k3_v))
-            new_pos = tuple(p + (dt / 6.0) * (k1_p[i] + 2 * k2_p[i] + 2 * k3_p[i] + k4_p[i]) for i, p in enumerate(pos))
-            new_vel = tuple(v + (dt / 6.0) * (k1_v[i] + 2 * k2_v[i] + 2 * k3_v[i] + k4_v[i]) for i, v in enumerate(vel))
-            return new_pos, new_vel
-        elif len(args) == 2:
-            engine, dt = args[0], args[1]
-            for entity in getattr(engine, 'entities', []):
-                if hasattr(entity, 'update_position'):
-                    entity.update_position(dt)
-            return engine
-        return None
+    def step(self, engine, dt):
+        # Basic Euler integration: pos = pos + v*dt
+        positions = [e.position for e in engine.entities]
+        accels = engine.calculate_accelerations(positions)
+        for i, entity in enumerate(engine.entities):
+            for axis in range(3):
+                entity.velocity[axis] += accels[i][axis] * dt
+                entity.position[axis] += entity.velocity[axis] * dt
