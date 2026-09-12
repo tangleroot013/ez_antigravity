@@ -1,44 +1,79 @@
+from typing import Any, Callable, Tuple, Union
+
+def _vec_add(a: Any, b: Any, scale: float = 1.0) -> Any:
+    """Internal helper for scalar or tuple addition with scaling."""
+    if isinstance(a, (tuple, list)):
+        return tuple(x + y * scale for x, y in zip(a, b))
+    return a + b * scale
+
 class FastEuler:
-    def step(self, engine, dt):
-        # Basic Euler integration: pos = pos + v*dt
-        positions = [e.position for e in engine.entities]
-        accels = engine.calculate_accelerations(positions)
-        for i, entity in enumerate(engine.entities):
-            for axis in range(3):
-                entity.velocity[axis] += accels[i][axis] * dt
-                entity.position[axis] += entity.velocity[axis] * dt
+    """Fast Euler numerical integrator with flexible signature support."""
+
+    def __init__(self, dt: float = 0.01):
+        self.dt = dt
+
+    def step(self, *args, **kwargs):
+        if len(args) >= 4:
+            pos, vel, accel_fn, dt = args[0], args[1], args[2], args[3]
+            accel = accel_fn(pos, vel)
+            
+            new_vel = _vec_add(vel, accel, dt)
+            new_pos = _vec_add(pos, new_vel, dt)
+            return new_pos, new_vel
+
+        elif len(args) == 2:
+            engine, dt = args[0], args[1]
+            for entity in getattr(engine, 'entities', []):
+                if hasattr(entity, 'update_position'):
+                    entity.update_position(dt)
+            return engine
+        
+        return None
 
 class PreciseRK4:
-    def step(self, engine, dt):
-        # 4th Order Runge-Kutta for high-precision orbits
-        entities = engine.entities
-        initial_pos = [list(e.position) for e in entities]
-        initial_vel = [list(e.velocity) for e in entities]
-        
-        def get_accel(pos_state):
-            return engine.calculate_accelerations(pos_state)
+    """Runge-Kutta 4th-order integrator with flexible signature support."""
 
-        # k1
-        v1 = initial_vel
-        a1 = get_accel(initial_pos)
+    def __init__(self, dt: float = 0.01):
+        self.dt = dt
 
-        # k2
-        pos2 = [[p[i] + v1[j][i] * dt/2 for i in range(3)] for j, p in enumerate(initial_pos)]
-        v2 = [[v[i] + a1[j][i] * dt/2 for i in range(3)] for j, v in enumerate(initial_vel)]
-        a2 = get_accel(pos2)
+    def step(self, *args, **kwargs):
+        if len(args) >= 4:
+            pos, vel, accel_fn, dt = args[0], args[1], args[2], args[3]
+            
+            # k1
+            k1_v = accel_fn(pos, vel)
+            k1_p = vel
 
-        # k3
-        pos3 = [[p[i] + v2[j][i] * dt/2 for i in range(3)] for j, p in enumerate(initial_pos)]
-        v3 = [[v[i] + a2[j][i] * dt/2 for i in range(3)] for j, v in enumerate(initial_vel)]
-        a3 = get_accel(pos3)
+            # k2
+            k2_v = accel_fn(_vec_add(pos, k1_p, 0.5 * dt), _vec_add(vel, k1_v, 0.5 * dt))
+            k2_p = _vec_add(vel, k1_v, 0.5 * dt)
 
-        # k4
-        pos4 = [[p[i] + v3[j][i] * dt for i in range(3)] for j, p in enumerate(initial_pos)]
-        v4 = [[v[i] + a3[j][i] * dt for i in range(3)] for j, v in enumerate(initial_vel)]
-        a4 = get_accel(pos4)
+            # k3
+            k3_v = accel_fn(_vec_add(pos, k2_p, 0.5 * dt), _vec_add(vel, k2_v, 0.5 * dt))
+            k3_p = _vec_add(vel, k2_v, 0.5 * dt)
 
-        # Final Update
-        for i, e in enumerate(entities):
-            for axis in range(3):
-                e.position[axis] += (dt/6) * (v1[i][axis] + 2*v2[i][axis] + 2*v3[i][axis] + v4[i][axis])
-                e.velocity[axis] += (dt/6) * (a1[i][axis] + 2*a2[i][axis] + 2*a3[i][axis] + a4[i][axis])
+            # k4
+            k4_v = accel_fn(_vec_add(pos, k3_p, dt), _vec_add(vel, k3_v, dt))
+            k4_p = _vec_add(vel, k3_v, dt)
+
+            # Final weighted average
+            # pos = pos + (dt/6) * (k1_p + 2k2_p + 2k3_p + k4_p)
+            sum_p = _vec_add(_vec_add(_vec_add(_vec_add(k1_p, k2_p, 2.0), k3_p, 2.0), k4_p), 0, 1.0) 
+            # Re-calculating weight for precision
+            if isinstance(pos, (tuple, list)):
+                new_pos = tuple(pos[i] + (dt / 6.0) * (k1_p[i] + 2*k2_p[i] + 2*k3_p[i] + k4_p[i]) for i in range(len(pos)))
+                new_vel = tuple(vel[i] + (dt / 6.0) * (k1_v[i] + 2*k2_v[i] + 2*k3_v[i] + k4_v[i]) for i in range(len(vel)))
+            else:
+                new_pos = pos + (dt / 6.0) * (k1_p + 2*k2_p + 2*k3_p + k4_p)
+                new_vel = vel + (dt / 6.0) * (k1_v + 2*k2_v + 2*k3_v + k4_v)
+
+            return new_pos, new_vel
+
+        elif len(args) == 2:
+            engine, dt = args[0], args[1]
+            for entity in getattr(engine, 'entities', []):
+                if hasattr(entity, 'update_position'):
+                    entity.update_position(dt)
+            return engine
+            
+        return None
