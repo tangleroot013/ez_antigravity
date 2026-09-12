@@ -1,11 +1,11 @@
 {
   "handover_metadata": {
-    "timestamp": "2026-09-12T18:55:00Z",
+    "timestamp": "2026-09-12T19:15:00Z",
     "operator": "Carter (The Duck)",
     "client": "bilbywilby",
     "workspace": "agy-workspace",
     "version": "0.1.0",
-    "status": "HARDENED"
+    "status": "FORTIFIED"
   },
   "environment_spec": {
     "platform": "Chromebook Crostini",
@@ -14,32 +14,40 @@
     "systemd_status": "ACTIVE",
     "git_branch": "main"
   },
-  "critical_updates": {
-    "permission_hardening": {
-      "issue": "Recurring loss of +x executable bit on shell scripts due to internal repair scripts (repair_workspace.py/fix_permissions.py) over-correcting to 644.",
-      "resolution": "Implemented 'Direct Execution' pattern in Git hooks and hardened the Git index.",
-      "actions_taken": [
-        "git update-index --chmod=+x for all *.sh files",
-        "Modified .git/hooks/pre-commit to invoke 'bash dev.sh' instead of './dev.sh'",
-        "Verified index mode 100755 across all toolchain scripts"
-      ]
+  "hardening_achievements": {
+    "permission_integrity": {
+      "mechanism": "resilience_audit.sh",
+      "git_state": "Index forced to 100755 for toolchain scripts",
+      "automation": "Integrated as Step 3 in dev.sh loop",
+      "result": "Automatic detection and repair of +x bit drift"
     },
-    "new_assets": {
-      "crostini_recovery.sh": "Automated repair for systemd, dbus, and .venv environments.",
-      "perf.sh": "Performance benchmark for the grav_engine physics loop.",
-      "resilience_yml": "Updated GitHub Action to include performance benchmarking."
+    "performance_telemetry": {
+      "tool": "log_perf.sh",
+      "data_format": "CSV (timestamp, commit, perf_value)",
+      "storage": "audit_logs/perf/engine_perf.csv",
+      "automation": "Integrated as Step 5 in dev.sh loop"
+    },
+    "opsec_wildcards": {
+      "gatekeeper": ".git/hooks/pre-push (Prevents push on audit/perf failure)",
+      "nest_snapshot": "snapshot_env.sh (Environment DNA mapping)",
+      "leak_sentry": "tools/leak_sentry.py (RSS memory monitoring)",
+      "watchduck": "systemd service for real-time drift repair (Configured)"
     }
   },
-  "opsec_check": {
-    "hook_status": "Fail-safe active",
-    "index_integrity": "Verified (100755)",
-    "recovery_path": "crostini_recovery.sh -> verify_crostini.sh",
-    "warning": "Avoid running repair_workspace.py without verifying if it will strip executable bits from the root toolchain."
+  "toolchain_map": {
+    "dev_loop": "dev.sh (5-Stage Process: Compile -> Test -> Audit -> Git Status -> Telemetry)",
+    "recovery": "crostini_recovery.sh",
+    "telemetry": "perf.sh -> log_perf.sh",
+    "audit": "resilience_audit.sh"
   },
-  "next_steps": [
-    "Monitor dev loop for any further permission drift",
-    "Integrate perf.sh results into a long-term tracking log",
-    "Expand resilience_audit.sh to detect permission stripping in real-time"
+  "critical_warnings": [
+    "Monitor repair_workspace.py for any recursive chmod 644 calls that could fight the Git index.",
+    "Ensure .venv is active when running leak_sentry.py."
   ],
-  "final_note": "The pond is secure. Everything is duck-proof. Quack!"
+  "next_steps": [
+    "Baseline the engine_perf.csv to establish 'normal' physics loop speeds.",
+    "Perform a full container restore using a snapshot_env.sh map to verify recovery speed.",
+    "Expand the Gatekeeper hook to include linting checks."
+  ],
+  "final_note": "The pond is absolute. The index is truth. The telemetry is clean. Quack!"
 }
