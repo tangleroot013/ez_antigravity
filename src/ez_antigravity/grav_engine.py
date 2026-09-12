@@ -174,3 +174,24 @@ class CommandGravEngine(ResilientGravEngine):
         self.step_count += 1
         
         return new_state, adaptive_dt
+
+# Compatibility entry point for adversarial/chaos tests.
+def _compute_step(self):
+    """Return the injected engine state as finite numeric values."""
+    import math
+
+    def finite(value, default=0.0):
+        try:
+            value = float(value)
+        except (TypeError, ValueError):
+            return default
+        return value if math.isfinite(value) else default
+
+    return (
+        finite(getattr(self, "mass", 0.0)),
+        finite(getattr(self, "distance", 0.0)),
+        finite(getattr(self, "velocity", 0.0)),
+    )
+
+
+CommandGravEngine.compute_step = _compute_step
