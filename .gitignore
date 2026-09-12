@@ -25,3 +25,13 @@ logs/
 audit_logs/
 *.log
 *.backup.*
+
+# Maintenance and Diagnostic Zones
+.archive/
+.diagnostics/
+.repair-backups/
+backups/
+handover/
+recovery/
+tmp_audit/
+audit_logs/

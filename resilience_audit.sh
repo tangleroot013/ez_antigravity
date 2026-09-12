@@ -1,10 +1,10 @@
 #!/bin/bash
-# Carter's Workspace Resilience Audit
-# Quack! Ensuring no shadow directories or permission drifts.
+# Carter's Refined Workspace Resilience Audit
+# Quack! Distinguishing between real drift and local debris.
 
 echo "--- 🦆 Starting Resilience Audit ---"
 
-# 1. Check for shadow directories (root copies of src folders)
+# 1. Check for shadow directories
 if [ -d "ez_antigravity" ]; then
     echo "❌ SHADOW DETECTED: Root directory 'ez_antigravity/' found. Purging..."
     rm -rf ez_antigravity/
@@ -14,7 +14,6 @@ else
 fi
 
 # 2. Verify critical file permissions
-# Ensure grav_engine.py is 644 (no accidental +x in git)
 if [ -f "src/ez_antigravity/grav_engine.py" ]; then
     PERMS=$(stat -c "%a" src/ez_antigravity/grav_engine.py)
     if [ "$PERMS" != "644" ]; then
@@ -25,11 +24,19 @@ if [ -f "src/ez_antigravity/grav_engine.py" ]; then
     fi
 fi
 
-# 3. Check git cleanliness
-if [[ -n $(git status --porcelain) ]]; then
-    echo "⚠️  GIT DIRTY: Uncommitted changes detected."
+# 3. Precision Git Check
+# Check only for modified tracked files
+if [[ -n $(git status --porcelain | grep '^ M') ]]; then
+    echo "⚠️  GIT DRIFT: Modified tracked files detected. Commit your changes!"
 else
-    echo "✅ Git state is pristine."
+    echo "✅ Git tracked state is pristine."
+fi
+
+# Check for untracked files (informational only)
+if [[ -n $(git status --porcelain | grep '??') ]]; then
+    echo "ℹ️  LOCAL DEBRIS: Untracked files exist in the workspace."
+else
+    echo "✅ Workspace is perfectly clean."
 fi
 
 echo "--- 🦆 Audit Complete ---"
