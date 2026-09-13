@@ -96,7 +96,8 @@ class NBodyEngine:
                 dy = pj[1] - pi[1]
                 dz = pj[2] - pi[2]
                 r = (dx*dx + dy*dy + dz*dz + self.epsilon**2) ** 0.5
-                potential -= self.G * self.entities[i].mass * self.entities[j].mass / r
+                potential -= self.G * \
+                    self.entities[i].mass * self.entities[j].mass / r
         return kinetic + potential
 
     # ------------------------------------------------------------------ #
@@ -107,11 +108,13 @@ class NBodyEngine:
         positions = [tuple(e.pos) for e in self.entities]
         velocities = [tuple(e.vel) for e in self.entities]
 
-        new_pos, new_vel = self.integrator.step(self, positions, velocities, dt)
+        new_pos, new_vel = self.integrator.step(
+            self, positions, velocities, dt)
 
         for ent, p, v in zip(self.entities, new_pos, new_vel):
             ent.pos = p
             ent.vel = v
+
 
 # Export for test compatibility
 __all__ = ["NBodyEngine", "GravEngine"]

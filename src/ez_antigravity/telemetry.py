@@ -2,9 +2,10 @@ import json
 import os
 from datetime import datetime
 
+
 class FlightTelemetry:
     """Structured logging for simulation state and health with self-healing files."""
-    
+
     def __init__(self, filename="flight_log.json"):
         self.filename = filename
         self.logs = []

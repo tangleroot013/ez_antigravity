@@ -4,7 +4,8 @@ import math
 G_CONST = 6.67430e-11
 EARTH_MASS = 5.972e24
 EARTH_RADIUS = 6371000.0
-STANDARD_G = 9.80665  # Retained for reference / backward-compat; no longer used in lift force
+# Retained for reference / backward-compat; no longer used in lift force
+STANDARD_G = 9.80665
 
 
 class PhysicsState:
@@ -57,7 +58,7 @@ class GravEngine:
     def local_gravity(self):
         """Inverse-square gravitational acceleration at the current altitude (m/s^2)."""
         r = EARTH_RADIUS + self.state.altitude_m
-        return (G_CONST * EARTH_MASS) / (r ** 2)
+        return (G_CONST * EARTH_MASS) / (r**2)
 
     def calculate_lift_force(self):
         if self.state.zero_g_mode:

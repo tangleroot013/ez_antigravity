@@ -1,42 +1,31 @@
 #!/bin/bash
-# Carter's Refined Workspace Resilience Audit
-# Quack! Distinguishing between real drift and local debris.
+# resilience_audit.sh - OPSEC Sentinel for Permission Drift
+# Target: Chromebook Crostini / agy-workspace
+# Author: Carter (The Duck)
 
-echo "--- 🦆 Starting Resilience Audit ---"
+LOG_FILE="audit_logs/permission_drift.log"
+mkdir -p audit_logs
 
-# 1. Check for shadow directories
-if [ -d "ez_antigravity" ]; then
-    echo "❌ SHADOW DETECTED: Root directory 'ez_antigravity/' found. Purging..."
-    rm -rf ez_antigravity/
-    echo "✅ Shadow purged."
-else
-    echo "✅ No shadow directories found."
-fi
+echo "[$(date +'%Y-%m-%dT%H:%M:%S')] Starting Permission Integrity Audit..."
 
-# 2. Verify critical file permissions
-if [ -f "src/ez_antigravity/grav_engine.py" ]; then
-    PERMS=$(stat -c "%a" src/ez_antigravity/grav_engine.py)
-    if [ "$PERMS" != "644" ]; then
-        echo "❌ PERM DRIFT: grav_engine.py is $PERMS, expected 644. Fixing..."
-        chmod 644 src/ez_antigravity/grav_engine.py
-    else
-        echo "✅ Permissions aligned."
+# Identify all shell scripts that SHOULD be executable
+# We search for .sh files and verify the 100755 mode (or +x bit)
+DRIFT_DETECTED=0
+
+while IFS= read -r script; do
+    if [ ! -x "$script" ]; then
+        echo "ALERT: Permission Drift Detected on $script"
+        echo "[$(date +'%Y-%m-%dT%H:%M:%S')] FAIL: $script lost executable bit" >> "$LOG_FILE"
+        DRIFT_DETECTED=1
     fi
-fi
+done < <(find . -name "*.sh" -not -path "*/.git/*")
 
-# 3. Precision Git Check
-# Check only for modified tracked files
-if [[ -n $(git status --porcelain | grep '^ M') ]]; then
-    echo "⚠️  GIT DRIFT: Modified tracked files detected. Commit your changes!"
+if [ $DRIFT_DETECTED -eq 1 ]; then
+    echo "❌ Integrity Violation: Executable bits missing. Check $LOG_FILE"
+    # Proactive recovery attempt
+    echo "Attempting atomic re-hardening of .sh assets..."
+    find . -name "*.sh" -not -path "*/.git/*" -exec chmod +x {} +
+    echo "✅ Recovery applied. Please verify with 'ls -la'."
 else
-    echo "✅ Git tracked state is pristine."
+    echo "✅ Pond is still. No permission drift detected."
 fi
-
-# Check for untracked files (informational only)
-if [[ -n $(git status --porcelain | grep '??') ]]; then
-    echo "ℹ️  LOCAL DEBRIS: Untracked files exist in the workspace."
-else
-    echo "✅ Workspace is perfectly clean."
-fi
-
-echo "--- 🦆 Audit Complete ---"

@@ -1,19 +1,20 @@
 from typing import Union, List, Optional
 
+
 class Entity:
     """Base Entity class with position, velocity, and mass."""
 
     def __init__(
-        self, 
-        id: Optional[int] = None, 
-        name: Optional[Union[str, float]] = None, 
-        mass: Union[float, List[float]] = 1.0, 
-        position: Optional[List[float]] = None, 
-        velocity: Optional[List[float]] = None, 
-        pos: Optional[List[float]] = None, 
+        self,
+        id: Optional[int] = None,
+        name: Optional[Union[str, float]] = None,
+        mass: Union[float, List[float]] = 1.0,
+        position: Optional[List[float]] = None,
+        velocity: Optional[List[float]] = None,
+        pos: Optional[List[float]] = None,
         vel: Optional[List[float]] = None
     ):
-        # Handle the quirky API requirement: 
+        # Handle the quirky API requirement:
         # If name is numeric and mass is a list, swap them.
         if isinstance(name, (int, float)) and isinstance(mass, (list, tuple)):
             vel = position
@@ -24,8 +25,10 @@ class Entity:
             velocity = None
 
         # Resolve position and velocity from multiple possible input keywords
-        p = position if position is not None else (pos if pos is not None else [0.0, 0.0, 0.0])
-        v = velocity if velocity is not None else (vel if vel is not None else [0.0, 0.0, 0.0])
+        p = position if position is not None else (
+            pos if pos is not None else [0.0, 0.0, 0.0])
+        v = velocity if velocity is not None else (
+            vel if vel is not None else [0.0, 0.0, 0.0])
 
         self.id = id
         self.name = name
@@ -69,6 +72,7 @@ class Entity:
         if len(value) != 3:
             raise ValueError("Velocity must be 3D")
         self.velocity = list(value)
+
 
 class GravEntity(Entity):
     """Gravitational entity subclass."""

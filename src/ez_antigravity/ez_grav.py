@@ -18,16 +18,20 @@ __all__ = [
     "GravEngine",
 ]
 
+
 class GravEngineState:
     """State container for GravEngine."""
+
     def __init__(self):
         self.mass_kg = 70.0
         self.altitude_m = 100.0
         self.is_negative_mass = False
         self.zero_g_mode = False
 
+
 class GravEngine:
     """Anti-gravity and gravitational physics engine."""
+
     def __init__(self, mass_kg=70.0, zero_g=False, integrator=None, *args, **kwargs):
         self.integrator = integrator
         self.state = GravEngineState()
@@ -41,11 +45,11 @@ class GravEngine:
     def calculate_lift_force(self):
         if self.state.zero_g_mode or self.state.altitude_m == 0.0:
             return 0.0
-        
+
         # Real physics: F = G * (m1 * m2) / r^2
         radius_m = EARTH_RADIUS + self.state.altitude_m
         force = (G_CONST * EARTH_MASS * self.state.mass_kg) / (radius_m**2)
-        
+
         if self.state.is_negative_mass:
             return -force
         return force

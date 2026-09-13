@@ -8,7 +8,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 UNESCAPED_UNDERSCORE = re.compile(r"(?<!\\)_")
 
 
@@ -61,17 +60,9 @@ def check_untracked_tests(repo: Path) -> bool:
         capture_output=True,
     )
 
-    paths = [
-        Path(raw.decode("utf-8"))
-        for raw in result.stdout.split(b"\0")
-        if raw
-    ]
+    paths = [Path(raw.decode("utf-8")) for raw in result.stdout.split(b"\0") if raw]
 
-    untracked_tests = [
-        path
-        for path in paths
-        if ".archive" not in path.parts
-    ]
+    untracked_tests = [path for path in paths if ".archive" not in path.parts]
 
     if untracked_tests:
         print("⚠️ Found untracked test files:")
@@ -113,8 +104,7 @@ def check_katex_syntax(repo: Path) -> bool:
                         f"{match.group(0)!r}"
                     )
                     print(
-                        "   Fix: escape the underscore as '\\_' inside "
-                        "\\text{...}."
+                        "   Fix: escape the underscore as '\\_' inside " "\\text{...}."
                     )
                     errors_found += 1
 

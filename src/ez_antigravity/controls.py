@@ -1,6 +1,6 @@
 class ThrustController:
     """Interface for applying active control forces to the engine."""
-    
+
     def __init__(self, max_thrust_n=500.0):
         self.max_thrust = max_thrust_n
         self.active_thrust = 0.0

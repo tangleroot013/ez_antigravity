@@ -6,6 +6,7 @@ independent of the engine implementation.
 import math
 from .constants import G_CONST, DEFAULT_SOFTENING
 
+
 def compute_gravitational_force(m1: float, m2: float,
                                 distance: float,
                                 softening: float = DEFAULT_SOFTENING) -> float:

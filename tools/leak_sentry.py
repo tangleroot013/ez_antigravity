@@ -4,13 +4,16 @@ import time
 import sys
 import argparse
 
+
 def monitor_command(cmd, threshold_mb):
     print(f"🦆 Sentry: Monitoring command: {cmd} (Threshold: {threshold_mb}MB)")
     try:
         # Start the process
-        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
         p = psutil.Process(proc.pid)
-        
+
         max_rss = 0
         # Sample aggressively until the process finishes
         while proc.poll() is None:
@@ -42,10 +45,13 @@ def monitor_command(cmd, threshold_mb):
         print(f"❌ Sentry Error: {e}")
         return False
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("command", help="The command to monitor")
-    parser.add_argument("--threshold", type=float, default=100.0, help="Memory threshold in MB")
+    parser.add_argument(
+        "--threshold", type=float, default=100.0, help="Memory threshold in MB"
+    )
     args = parser.parse_args()
 
     if monitor_command(args.command, args.threshold):

@@ -1,24 +1,26 @@
 import math
 from .constants import RHO_0, SCALE_HEIGHT, J2_CONSTANT, DRAG_COEFF, CROSS_SECTION_AREA, EARTH_MASS, G_CONST, EARTH_RADIUS
 
+
 class PerturbationModel:
     """Calculates non-keplerian accelerations for real-world resilience."""
-    
+
     @staticmethod
     def get_atmospheric_drag(r, v):
         """Calculates drag acceleration: a = -0.5 * rho * v^2 * Cd * A / m"""
         altitude = r - EARTH_RADIUS
-        if altitude > 1000000: # Negligible drag above 1000km
+        if altitude > 1000000:  # Negligible drag above 1000km
             return 0.0
-            
+
         # Exponential atmospheric density model
         rho = RHO_0 * math.exp(-altitude / SCALE_HEIGHT)
         # We assume mass is 70kg for this specific calculation context
-        mass = 70.0 
-        
+        mass = 70.0
+
         # Drag acts opposite to velocity vector
         # a_drag = -0.5 * rho * v * (Cd * A / m)
-        accel_drag = -0.5 * rho * abs(v) * (DRAG_COEFF * CROSS_SECTION_AREA / mass)
+        accel_drag = -0.5 * rho * \
+            abs(v) * (DRAG_COEFF * CROSS_SECTION_AREA / mass)
         return accel_drag
 
     @staticmethod

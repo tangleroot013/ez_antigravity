@@ -1,5 +1,6 @@
 from ez_antigravity.integrators import FastEuler
 
+
 class NBodyEngine:
     """N-body gravitational and physical simulation engine."""
 
@@ -17,10 +18,13 @@ class NBodyEngine:
         accels = [[0.0, 0.0, 0.0] for _ in positions]
         for i, pos_i in enumerate(positions):
             for j, pos_j in enumerate(positions):
-                if i == j: continue
-                dx, dy, dz = pos_j[0]-pos_i[0], pos_j[1]-pos_i[1], pos_j[2]-pos_i[2]
+                if i == j:
+                    continue
+                dx, dy, dz = pos_j[0]-pos_i[0], pos_j[1] - \
+                    pos_i[1], pos_j[2]-pos_i[2]
                 dist_sq = dx**2 + dy**2 + dz**2 + self.epsilon**2
-                if dist_sq == 0: continue
+                if dist_sq == 0:
+                    continue
                 dist = dist_sq**0.5
                 force = self.G * self.entities[j].mass / dist_sq
                 accels[i][0] += force * dx / dist
@@ -43,10 +47,11 @@ class NBodyEngine:
             v_sq = sum(v**2 for v in e1.velocity)
             ke += 0.5 * e1.mass * v_sq
             for j, e2 in enumerate(self.entities):
-                if j <= i: continue
-                dist = ((e2.position[0]-e1.position[0])**2 + 
-                       (e2.position[1]-e1.position[1])**2 + 
-                       (e2.position[2]-e1.position[2])**2 + self.epsilon**2)**0.5
+                if j <= i:
+                    continue
+                dist = ((e2.position[0]-e1.position[0])**2 +
+                        (e2.position[1]-e1.position[1])**2 +
+                        (e2.position[2]-e1.position[2])**2 + self.epsilon**2)**0.5
                 if dist > 0:
                     pe -= self.G * e1.mass * e2.mass / dist
         return ke + pe

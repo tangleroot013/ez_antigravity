@@ -15,7 +15,6 @@ Features:
 - No file deletions – only adds/overwrites the target files.
 """
 
-import os
 import sys
 from pathlib import Path
 
@@ -52,7 +51,7 @@ def repair_engine() -> None:
 
     def calculate_lift_force(self, entity=None):
         \"\"\"Placeholder lift‑force calculator – returns a zero vector.\"
-        \"\"\" 
+        \"\"\"
         # The tests only require the method to exist; a zero vector is safe.
         return [0.0, 0.0, 0.0]
 

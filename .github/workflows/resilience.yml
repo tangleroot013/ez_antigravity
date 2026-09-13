@@ -52,3 +52,7 @@ jobs:
       run: |
         chmod +x dev.sh resilience_audit.sh
         ./dev.sh
+    - name: Run Performance Benchmark
+      run: |
+        chmod +x perf.sh
+        ./perf.sh
