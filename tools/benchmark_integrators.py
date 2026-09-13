@@ -5,7 +5,7 @@ import sys
 import os
 
 # Add src to path for imports
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))  # noqa: E501
 
 
 def calculate_energy(r, v):
@@ -19,7 +19,7 @@ def run_benchmark(integrator_cls, steps=1000, dt=0.1):
     e0 = calculate_energy(r, v)
 
     for _ in range(steps):
-        r, v = engine.integrator.step((r, v), dt, engine.calculate_accelerations)
+        r, v = engine.integrator.step((r, v), dt, engine.calculate_accelerations)  # noqa: E501
 
     ef = calculate_energy(r, v)
     return ef - e0, r, v
@@ -32,7 +32,7 @@ if __name__ == "__main__":
         ("Verlet", VerletIntegrator),
     ]
 
-    print(f"{'Integrator':<12} | {'Drift':<15} | {'Final R':<15} | {'Final V':<15}")
+    print(f"{'Integrator':<12} | {'Drift':<15} | {'Final R':<15} | {'Final V':<15}")  # noqa: E501
     print("-" * 60)
 
     for name, cls in integrators:

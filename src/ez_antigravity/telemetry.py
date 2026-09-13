@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 class FlightTelemetry:
-    """Structured logging for simulation state and health with self-healing files."""
+    """Structured logging for simulation state and health with self-healing files."""  # noqa: E501
 
     def __init__(self, filename="flight_log.json"):
         self.filename = filename

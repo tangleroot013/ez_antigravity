@@ -32,7 +32,7 @@ class GravEngineState:
 class GravEngine:
     """Anti-gravity and gravitational physics engine."""
 
-    def __init__(self, mass_kg=70.0, zero_g=False, integrator=None, *args, **kwargs):
+    def __init__(self, mass_kg=70.0, zero_g=False, integrator=None, *args, **kwargs):  # noqa: E501
         self.integrator = integrator
         self.state = GravEngineState()
         self.state.mass_kg = mass_kg

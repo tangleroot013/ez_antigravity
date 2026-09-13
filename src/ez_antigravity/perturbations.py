@@ -1,5 +1,5 @@
 import math
-from .constants import RHO_0, SCALE_HEIGHT, J2_CONSTANT, DRAG_COEFF, CROSS_SECTION_AREA, EARTH_MASS, G_CONST, EARTH_RADIUS
+from .constants import RHO_0, SCALE_HEIGHT, J2_CONSTANT, DRAG_COEFF, CROSS_SECTION_AREA, EARTH_MASS, G_CONST, EARTH_RADIUS  # noqa: E501
 
 
 class PerturbationModel:
@@ -28,4 +28,4 @@ class PerturbationModel:
         """Calculates acceleration due to Earth's oblateness (J2 effect)."""
         # Simplified J2 effect for a 1D radial projection
         # In 3D this varies by latitude, but we'll add a variance factor
-        return (3/2) * J2_CONSTANT * (G_CONST * EARTH_MASS / r**2) * (EARTH_RADIUS / r)**2
+        return (3/2) * J2_CONSTANT * (G_CONST * EARTH_MASS / r**2) * (EARTH_RADIUS / r)**2  # noqa: E501

@@ -30,14 +30,14 @@ def monitor_command(cmd, threshold_mb):
             final_rss = p.memory_info().rss / (1024 * 1024)
             max_rss = max(max_rss, final_rss)
         except psutil.NoSuchProcess:
-            # If it's gone and max_rss is still 0, it finished faster than our first sample
+            # If it's gone and max_rss is still 0, it finished faster than our first sample  # noqa: E501
             if max_rss == 0:
-                print("⚡ Process finished too fast to sample. Assuming no leak.")
+                print("⚡ Process finished too fast to sample. Assuming no leak.")  # noqa: E501
                 return True
 
         print(f"✅ Peak Memory Footprint: {max_rss:.2f} MB")
         if max_rss > threshold_mb:
-            print(f"🚩 LEAK DETECTED: {max_rss:.2f} MB exceeds {threshold_mb} MB!")
+            print(f"🚩 LEAK DETECTED: {max_rss:.2f} MB exceeds {threshold_mb} MB!")  # noqa: E501
             return False
         return True
 

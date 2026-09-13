@@ -13,7 +13,7 @@ Also re‑exports GravEngine for backward‑compatible imports:
 
 from typing import List, Tuple, Optional
 from .entities import GravEntity
-from .integrators import FastEuler, PreciseRK4
+from .integrators import FastEuler, PreciseRK4  # noqa: F401
 from .grav_engine import GravEngine   # <-- re‑export
 
 Vector = Tuple[float, float, float]

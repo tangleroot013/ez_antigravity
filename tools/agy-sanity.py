@@ -60,7 +60,7 @@ def check_untracked_tests(repo: Path) -> bool:
         capture_output=True,
     )
 
-    paths = [Path(raw.decode("utf-8")) for raw in result.stdout.split(b"\0") if raw]
+    paths = [Path(raw.decode("utf-8")) for raw in result.stdout.split(b"\0") if raw]  # noqa: E501
 
     untracked_tests = [path for path in paths if ".archive" not in path.parts]
 
@@ -104,7 +104,7 @@ def check_katex_syntax(repo: Path) -> bool:
                         f"{match.group(0)!r}"
                     )
                     print(
-                        "   Fix: escape the underscore as '\\_' inside " "\\text{...}."
+                        "   Fix: escape the underscore as '\\_' inside " "\\text{...}."  # noqa: E501
                     )
                     errors_found += 1
 

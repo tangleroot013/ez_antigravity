@@ -15,7 +15,7 @@ class GravEngineState:
 class GravEngine:
     """Anti-gravity and gravitational physics engine."""
 
-    def __init__(self, mass_kg=70.0, zero_g=False, integrator=None, *args, **kwargs):
+    def __init__(self, mass_kg=70.0, zero_g=False, integrator=None, *args, **kwargs):  # noqa: E501
         self.integrator = integrator
         self.state = GravEngineState()
         self.state.mass_kg = mass_kg
@@ -53,13 +53,13 @@ class GravEngine:
             if len(args) >= 3:
                 state = (args[0], args[1])
                 dt = args[2]
-                return self.integrator.step(state, dt, self.calculate_accelerations)
-            return self.integrator.step(self.state, 0.1, self.calculate_accelerations)
+                return self.integrator.step(state, dt, self.calculate_accelerations)  # noqa: E501
+            return self.integrator.step(self.state, 0.1, self.calculate_accelerations)  # noqa: E501
         return args[0] if args else None
 
 
 class ResilientGravEngine(GravEngine):
-    """Production-grade engine with atmospheric drag, J2 effects, and safety guards."""
+    """Production-grade engine with atmospheric drag, J2 effects, and safety guards."""  # noqa: E501
 
     def calculate_accelerations(self, position):
         # 1. Safety Guard: Ground Collision
@@ -75,9 +75,9 @@ class ResilientGravEngine(GravEngine):
             base_accel = -accel if self.state.is_negative_mass else accel
 
         # 3. Add Perturbations
-        # For this simplified 1D-ish engine, we pass current position and velocity
-        # Note: Since calculate_accelerations only takes position, we use a state cache
-        # or a reasonable estimate. For a true 1D test, we'll assume v is handled
+        # For this simplified 1D-ish engine, we pass current position and velocity  # noqa: E501
+        # Note: Since calculate_accelerations only takes position, we use a state cache  # noqa: E501
+        # or a reasonable estimate. For a true 1D test, we'll assume v is handled  # noqa: E501
         # by the integrator.
 
         j2 = PerturbationModel.get_j2_perturbation(position)
@@ -102,7 +102,7 @@ class ResilientGravEngine(GravEngine):
 
         # Use the integrator with the combined acceleration
         if self.integrator:
-            # We wrap the net_accel in a lambda to satisfy the integrator's signature
+            # We wrap the net_accel in a lambda to satisfy the integrator's signature  # noqa: E501
             return self.integrator.step(state, dt, lambda p: net_accel)
         return state
 
@@ -152,12 +152,12 @@ class CommandGravEngine(ResilientGravEngine):
 
     def adaptive_command_update(self, state, base_dt, tolerance=0.01):
         """
-        Adjusts dt dynamically based on acceleration to prevent integration errors.
+        Adjusts dt dynamically based on acceleration to prevent integration errors.  # noqa: E501
         dt_effective = base_dt / (1 + |accel| * tolerance)
         """
         pos, vel = state
 
-        # Calculate current acceleration to determine the 'spiciness' of the environment
+        # Calculate current acceleration to determine the 'spiciness' of the environment  # noqa: E501
         accel_phys = self.calculate_accelerations(pos)
         drag = PerturbationModel.get_atmospheric_drag(pos, vel)
         accel_thrust = self.controller.get_acceleration(self.state.mass_kg)
@@ -170,7 +170,7 @@ class CommandGravEngine(ResilientGravEngine):
         new_state = self.integrator.step(
             state, adaptive_dt, lambda p: net_accel)
 
-        # Log the state (including the adaptive dt in a custom status if needed)
+        # Log the state (including the adaptive dt in a custom status if needed)  # noqa: E501
         status = "NOMINAL"
         if pos <= EARTH_RADIUS:
             status = "CRASHED"

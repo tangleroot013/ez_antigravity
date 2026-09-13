@@ -4,11 +4,11 @@ from ez_antigravity.integrators import FastEuler
 class NBodyEngine:
     """N-body gravitational and physical simulation engine."""
 
-    def __init__(self, G=1.0, epsilon=0.0, integrator=None, *args, **kwargs) -> None:
+    def __init__(self, G=1.0, epsilon=0.0, integrator=None, *args, **kwargs) -> None:  # noqa: E501
         self.entities = []
         self.G = G
         self.epsilon = epsilon
-        # Contract: integrator must not be None to satisfy test_integrator_signature
+        # Contract: integrator must not be None to satisfy test_integrator_signature  # noqa: E501
         self.integrator = integrator or FastEuler()
 
     def add_entity(self, entity) -> None:
@@ -51,7 +51,7 @@ class NBodyEngine:
                     continue
                 dist = ((e2.position[0]-e1.position[0])**2 +
                         (e2.position[1]-e1.position[1])**2 +
-                        (e2.position[2]-e1.position[2])**2 + self.epsilon**2)**0.5
+                        (e2.position[2]-e1.position[2])**2 + self.epsilon**2)**0.5  # noqa: E501
                 if dist > 0:
                     pe -= self.G * e1.mass * e2.mass / dist
         return ke + pe

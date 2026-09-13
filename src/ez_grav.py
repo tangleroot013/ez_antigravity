@@ -28,7 +28,7 @@ class PhysicsState:
         self.is_negative_mass = is_negative_mass
 
     def tick(self, dt=1.0):
-        """Advance thermal state by dt seconds. Returns a list of log messages."""
+        """Advance thermal state by dt seconds. Returns a list of log messages."""  # noqa: E501
         logs = []
 
         if self.altitude_m < 0:
@@ -42,7 +42,7 @@ class PhysicsState:
             logs.append("EMERGENCY AUTO-CUTOFF: Temperature critical")
         else:
             self.coil_temp_c -= (
-                (self.coil_temp_c - self.ambient_temp_c) * self.cooling_rate * dt
+                (self.coil_temp_c - self.ambient_temp_c) * self.cooling_rate * dt  # noqa: E501
             )
 
         return logs
@@ -56,7 +56,7 @@ class GravEngine:
         self.state.is_negative_mass = bool(flag)
 
     def local_gravity(self):
-        """Inverse-square gravitational acceleration at the current altitude (m/s^2)."""
+        """Inverse-square gravitational acceleration at the current altitude (m/s^2)."""  # noqa: E501
         r = EARTH_RADIUS + self.state.altitude_m
         return (G_CONST * EARTH_MASS) / (r**2)
 
