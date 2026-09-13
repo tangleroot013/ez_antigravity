@@ -35,3 +35,6 @@ handover/
 recovery/
 tmp_audit/
 audit_logs/
+# Telemetry and Audit Logs
+audit_logs/
+performance.log

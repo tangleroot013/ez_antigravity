@@ -2,3 +2,4 @@ numpy
 pytest
 numpy
 psutil
+flake8
