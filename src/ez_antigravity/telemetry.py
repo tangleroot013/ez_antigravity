@@ -1,50 +1,85 @@
-import json
-import os
-from datetime import datetime
+import logging
+from .config import Config
+
+
+def setup_telemetry(level=logging.INFO):
+    """Configures the global logger for engine resilience."""
+    log_format = logging.Formatter(
+        '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+    )
+
+    # File Handler for persistence
+    file_handler = logging.FileHandler(Config.LOG_DIR / "engine.log")
+    file_handler.setFormatter(log_format)
+
+    # Console Handler for real-time monitoring
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(log_format)
+
+    logger = logging.getLogger("ez_antigravity")
+    logger.setLevel(level)
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+
+    return logger
+
+
+# Global instance for easy import
+logger = setup_telemetry()
 
 
 class FlightTelemetry:
-    """Structured logging for simulation state and health with self-healing files."""  # noqa: E501
+    """Collects simulation telemetry and writes it as JSON."""
 
-    def __init__(self, filename="flight_log.json"):
-        self.filename = filename
-        self.logs = []
-        self._ensure_file_exists()
+    def __init__(self, filename=None):
+        from pathlib import Path
 
-    def _ensure_file_exists(self):
-        """Creates the log file with an empty list if it doesn't exist."""
-        if not os.path.exists(self.filename):
-            with open(self.filename, 'w') as f:
-                json.dump([], f)
+        self.filename = (
+            Path(filename)
+            if filename is not None
+            else Path("logs") / "flight_log.json"
+        )
+        self.records = []
 
-    def record(self, step, position, velocity, acceleration, status="NOMINAL"):
-        entry = {
-            "timestamp": datetime.utcnow().isoformat(),
-            "step": step,
-            "r": position,
-            "v": velocity,
-            "a": acceleration,
-            "status": status
-        }
-        self.logs.append(entry)
-        if len(self.logs) >= 100:
-            self.flush()
+    @staticmethod
+    def _serialize(value):
+        """Convert NumPy-like values into JSON-compatible values."""
+        if hasattr(value, "tolist"):
+            return value.tolist()
 
-    def flush(self):
-        self._ensure_file_exists()
-        try:
-            with open(self.filename, 'r+') as f:
-                try:
-                    data = json.load(f)
-                except json.JSONDecodeError:
-                    data = []
-                data.extend(self.logs)
-                f.seek(0)
-                json.dump(data, f, indent=2)
-                f.truncate()
-            self.logs = []
-        except Exception as e:
-            print(f"Telemetry Flush Error: {e}")
+        if isinstance(value, dict):
+            return {
+                str(key): FlightTelemetry._serialize(item)
+                for key, item in value.items()
+            }
+
+        if isinstance(value, (list, tuple)):
+            return [FlightTelemetry._serialize(item) for item in value]
+
+        return value
+
+    def record(self, step, pos, vel, net_accel, status):
+        """Store one simulation telemetry record."""
+        self.records.append(
+            {
+                "step": int(step),
+                "position": self._serialize(pos),
+                "velocity": self._serialize(vel),
+                "net_acceleration": self._serialize(net_accel),
+                "status": self._serialize(status),
+            }
+        )
 
     def finalize(self):
-        self.flush()
+        """Persist all collected records to JSON."""
+        import json
+        from pathlib import Path
+
+        path = Path(self.filename)
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        with path.open("w", encoding="utf-8") as handle:
+            json.dump(self.records, handle, indent=2)
+
+        logger.info("Flight telemetry finalized: %s", path)
+        return path

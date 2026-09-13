@@ -38,3 +38,8 @@ audit_logs/
 # Telemetry and Audit Logs
 audit_logs/
 performance.log
+
+# Python generated files
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
